@@ -1,0 +1,42 @@
+{
+  "name": "nf-core-reviewer",
+  "version": "0.1.0",
+  "description": "Review and score nf-core/modules pull requests the way vagkaratzas reviews them",
+  "author": {
+    "name": "Evangelos Karatzas",
+    "email": "vagkaratzas1990@gmail.com",
+    "url": "https://github.com/vagkaratzas"
+  },
+  "homepage": "https://github.com/vagkaratzas/nf-core-reviewer",
+  "repository": "https://github.com/vagkaratzas/nf-core-reviewer",
+  "license": "MIT",
+  "keywords": [
+    "nextflow",
+    "nf-core",
+    "bioinformatics",
+    "code-review",
+    "nf-test"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "nf-core Reviewer",
+    "shortDescription": "Review and score nf-core/modules PRs",
+    "longDescription": "Reviews nf-core/modules pull requests and local module or subworkflow branches against a versioned rubric, scores them out of 10 (Diff and Overall), and drafts inline review comments for vagkaratzas to post.",
+    "developerName": "Evangelos Karatzas",
+    "category": "Bioinformatics",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Review nf-core/modules PR 1234",
+      "Score the module on my current branch"
+    ],
+    "websiteURL": "https://github.com/vagkaratzas/nf-core-reviewer",
+    "privacyPolicyURL": "https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement",
+    "termsOfServiceURL": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
+    "brandColor": "#24A148",
+    "screenshots": []
+  }
+}
