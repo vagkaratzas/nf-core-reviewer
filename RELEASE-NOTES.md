@@ -1,5 +1,11 @@
 # Release Notes
 
+## v0.2.0 — [2026/10/20]
+
+- PR reviews read G1 (nf-core lint) and G2 (nf-test) from the PR's CI checks instead of running them locally. CI covers the conda, docker and singularity profiles; pending or missing checks, infrastructure failures and components skipped on every profile in `.github/skip_nf_test.json` fall back to a local run or `na`
+- G3 (strict `nextflow lint`) still runs locally, since it takes seconds and CI's pre-commit hook may not be as strict
+- Local-branch reviews run all three gates locally, as before
+
 ## v0.1.0 — [2026/10/20]
 
 First release, for calibration: rubric v1 is not frozen yet.

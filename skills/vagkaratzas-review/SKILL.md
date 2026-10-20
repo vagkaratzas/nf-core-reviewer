@@ -9,7 +9,7 @@ You review as a bot standing in for vagkaratzas. Every rule, severity and the sc
 
 - **Never approve.** The event is `REQUEST_CHANGES` or `COMMENT`. Approving is always the human's call.
 - **Script verdicts stand.** Overturn a `scripts/review.py check` hit only as a false positive, and say why in the review.
-- **Never fake a gate.** A command you could not run is `na`, and the review says it was not run.
+- **Never fake a gate.** A gate that neither CI nor you ran is `na`, and the review says it was not run.
 - **Draft first.** Write the review to a file. Post it only when the user asks.
 
 ## Inputs
@@ -36,11 +36,18 @@ Placeholders: `<modules_repo>` is the user's nf-core/modules clone (ask if unkno
      git -C <modules_repo> diff FETCH_HEAD...HEAD > <work>/<branch>.diff
      ```
    - The components are the changed `modules/nf-core/<tool>[/<sub>]` and `subworkflows/nf-core/<name>` folders in the diff.
-2. **Run the gates** (G1–G3 in the rubric) from the review checkout, once per component. Use the tools on the user's PATH. If they are missing, look in the conda base env before giving up. Run G2 and G3 with the Nextflow version CI pins, because results differ between versions. Set it in the same command, since shell state may not persist between commands:
-   ```bash
-   NXF_VER=$(grep -oP 'NXF_VER:\s*"\K[^"]+' .github/workflows/nf-test.yml) nf-test test ...
-   ```
-   Run nf-test with `--profile=+singularity`, and never with `--update-snapshot`: a snapshot mismatch is a failure.
+2. **Get the gates** (G1–G3 in the rubric), once per component. In PR mode, G1 and G2 come from the PR's CI, which already ran them on three profiles; G3 always runs locally.
+   - **PR mode, G1 and G2 from CI.** `gh pr checks <N> -R nf-core/modules` lists the checks on the PR's head commit.
+     - G1 is the `nf-core lint modules (<tool/sub>)` or `nf-core lint subworkflows (<name>)` job.
+     - G2 is `confirm-pass-nf-test` (`confirm-pass-gpu` for GPU components), which sums up every `<arch> | <profile> | <shard>` job.
+     - Pass and fail count as they are. A failed G1 or G2 job is linked in the review body. If its log shows an infrastructure error (runner, network, pull timeout) rather than a test failure, run that gate locally instead.
+     - A check that is still `pending` or missing (CI waits for maintainer approval on a first-time contributor's PR) is not a pass: run that gate locally, or mark it `na`.
+     - Look the component up in `.github/skip_nf_test.json`. Listed under every profile means CI ran no test: run G2 locally. Listed under some profiles: G2 stands on the others, and the review body names the skipped ones.
+   - **Locally**: G3 always; G1 and G2 in local mode or when CI cannot answer. Run from the review checkout with the tools on the user's PATH. If they are missing, look in the conda base env before giving up. Run nf-test and `nextflow lint` with the Nextflow version CI pins, because results differ between versions. Set it in the same command, since shell state may not persist between commands:
+     ```bash
+     NXF_VER=$(grep -oP 'NXF_VER:\s*"\K[^"]+' .github/workflows/nf-test.yml) nf-test test ...
+     ```
+     Run nf-test with `--profile=+singularity`, and never with `--update-snapshot`: a snapshot mismatch is a failure.
 3. **Run the script rules** once per component:
    ```bash
    python3 <skill_dir>/scripts/review.py check <component_dir> --diff <work>/<diff file>

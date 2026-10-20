@@ -31,6 +31,8 @@ Gates get the same verdict in both columns. A gate that could not be run is `na`
 | G2 | gate | command | `nf-test test <component>/main.nf --related-tests --follow-dependencies --profile=+singularity` passes with the committed snapshots: the component's own tests and every caller's. |
 | G3 | gate | command | `nextflow lint` (strict syntax) reports no errors on the component's `main.nf` and `*.config` files. |
 
+For a PR, G1 and G2 are read from its CI checks (`SKILL.md` step 2 says how). CI runs G2 on the conda, docker and singularity profiles. G3 always runs locally.
+
 ## Containers and environment
 
 | ID | Severity | Check | Rule |
