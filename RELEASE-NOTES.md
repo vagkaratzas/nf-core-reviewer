@@ -1,5 +1,12 @@
 # Release Notes
 
+## v0.3.0 — [2026/10/20]
+
+Rubric v2: scores are not comparable with rubric v1.
+
+- T4 now follows the nf-core template: a bare `assert process.success` (or `workflow.success`) comes before `assertAll(...)`, which holds the snapshot. Rubric v1 required the opposite. T4 is now a nit (0 points) instead of a major
+- `review.py check` matches `assertAll (` written with a space; T4 used to fail every test written that way
+
 ## v0.2.0 — [2026/10/20]
 
 - PR reviews read G1 (nf-core lint) and G2 (nf-test) from the PR's CI checks instead of running them locally. CI covers the conda, docker and singularity profiles; pending or missing checks, infrastructure failures and components skipped on every profile in `.github/skip_nf_test.json` fall back to a local run or `na`

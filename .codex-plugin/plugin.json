@@ -1,6 +1,6 @@
 {
   "name": "nf-core-reviewer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Review and score nf-core/modules pull requests the way vagkaratzas reviews them",
   "author": {
     "name": "Evangelos Karatzas",

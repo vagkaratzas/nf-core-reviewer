@@ -1,4 +1,4 @@
-# vagkaratzas-review rubric v1
+# vagkaratzas-review rubric v2
 
 Bump the version in this title whenever a rule, severity or weight changes: scores are only comparable within one rubric version.
 
@@ -65,7 +65,7 @@ For a PR, G1 and G2 are read from its CI checks (`SKILL.md` step 2 says how). CI
 | T1 | blocker | script | Every test, stub included, asserts `snapshot(sanitizeOutput(process.out ...))` (`workflow.out` for subworkflows): `sanitizeOutput` inside `snapshot(...)`, never raw `.out`, no separate versions assertion. |
 | T2 | major | judgment | `unstableKeys` lists only channels whose content truly changes between runs, and each exempted channel gets the strongest stable check back in the same `snapshot(...)`: line count, else `.contains()` on a line the tool always writes. Hand-picking channels instead of `unstableKeys` fails. |
 | T3 | blocker | script | At least one `options "-stub"` test. |
-| T4 | major | script | `assert process.success` sits inside `assertAll(...)` with the snapshot. |
+| T4 | nit | script | As in the nf-core template: a bare `assert process.success` (`workflow.success` for subworkflows) comes first, then `assertAll(...)` holds the snapshot. |
 | T5 | major | script | Test names follow `<organism> - <inputs> - <outputs/config>`, e.g. `sarscov2 - [ cram, crai ] - fasta - fai`. Stub tests end with ` - stub`. |
 | T6 | nit | script | Sentence-style names (`Should search ... and return ...`) are nf-core-valid but not preferred; grouped inputs are written `[ bam, bai ]`, with spaces. |
 | T7 | major | script | Modules: `tests/nextflow.config` takes arguments as `ext.args = { params.module_args ?: '' }` (fixed flags may precede it), and tests that need arguments set `params { module_args = '...' }` in their `when` block. |

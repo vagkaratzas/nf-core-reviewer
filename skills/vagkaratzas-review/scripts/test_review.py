@@ -35,8 +35,10 @@ BAD_TEST = """nextflow_process {
     test("test1") {
         when { process { \"\"\" input[0] = Channel.of([ [id:'t'], file("${projectDir}/x.txt") ]) \"\"\" } }
         then {
-            assert process.success
-            assert snapshot(process.out).match()
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
         }
     }
 }
@@ -96,8 +98,8 @@ GOOD_TEST = """nextflow_process {
             }
         }
         then {
+            assert process.success
             assertAll(
-                { assert process.success },
                 { assert snapshot(sanitizeOutput(process.out)).match() }
             )
         }
@@ -110,8 +112,8 @@ GOOD_TEST = """nextflow_process {
             process { \"\"\" input[0] = [ [ id:'test' ], [] ] \"\"\" }
         }
         then {
+            assert process.success
             assertAll(
-                { assert process.success },
                 { assert snapshot(sanitizeOutput(process.out)).match() }
             )
         }
@@ -189,6 +191,15 @@ class CheckTest(unittest.TestCase):
             (comp / "tests" / "main.nf.test.snap").write_text(review.json.dumps(snap))
             fails = failing(review.Checker(comp, root).run())
         self.assertTrue({"T9", "T10"} <= fails, fails)
+
+    def test_t4_wants_template_order(self):
+        inside = 'test("a - b - c") { then { assertAll ( { assert process.success }, { assert snapshot(sanitizeOutput(process.out)).match() } ) } }\n'
+        template = 'test("a - b - c") { then { assert process.success\n assertAll( { assert snapshot(sanitizeOutput(process.out)).match() } ) } }\n'
+        for test, expected in ((inside, True), (template, False)):
+            with tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                comp = make_module(root, GOOD_MAIN, test, ENV)
+                self.assertEqual("T4" in failing(review.Checker(comp, root).run()), expected, test)
 
     def test_diff_scope(self):
         diff = ("diff --git a/x.nf b/x.nf\n--- a/x.nf\n+++ b/x.nf\n@@ -1,2 +1,3 @@\n a\n+b\n c\n"

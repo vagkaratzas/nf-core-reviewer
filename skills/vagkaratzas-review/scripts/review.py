@@ -282,10 +282,10 @@ class Checker:
             for m in snaps:
                 if not body.startswith("sanitizeOutput(", m.end()):
                     self.fail("T1", self.test, line_of(text, start + m.start()), f'snapshot without sanitizeOutput in "{name}"')
-            outer = body.find("assertAll(")
+            outer = re.search(r"assertAll\s*\(", body)
             status = re.search(r"assert\s+(process|workflow)\.(success|failed)", body)
-            if outer < 0 or not status or status.start() < outer:
-                self.fail("T4", self.test, ln, f'"{name}": put `assert process.success` inside assertAll(...)')
+            if not status or (outer and outer.start() < status.start()):
+                self.fail("T4", self.test, ln, f'"{name}": put a bare `assert process.success` before assertAll(...), as the nf-core template does')
             if " - " in name:
                 if stub and not name.endswith(" - stub"):
                     self.fail("T5", self.test, ln, f'stub test name should end with " - stub": "{name}"')
