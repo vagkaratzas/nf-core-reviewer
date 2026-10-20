@@ -16,6 +16,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
 RUBRIC = Path(__file__).resolve().parent.parent / "rubric.md"
+PLUGIN_ROOT = Path(__file__).resolve().parents[3]
 WEIGHTS = {"blocker": 3, "major": 2, "minor": 1, "nit": 0}
 GATE_FACTOR = Decimal("0.4")
 EMPTY_MD5 = "d41d8cd98f00b204e9800998ecf8427e"
@@ -398,6 +399,17 @@ def load_rubric(path=RUBRIC):
     return dict(re.findall(pattern, Path(path).read_text(), re.M))
 
 
+def footer(rubric=RUBRIC, root=PLUGIN_ROOT):
+    """Reviewer identity line: plugin version from its manifest, rubric version from the rubric title."""
+    version = "unknown"
+    for manifest in (".claude-plugin/plugin.json", ".codex-plugin/plugin.json"):
+        if (root / manifest).is_file():
+            version = json.loads((root / manifest).read_text()).get("version", version)
+            break
+    m = re.search(r"rubric (v\d+)", Path(rubric).read_text())
+    return f"nf-core-reviewer {version} / vagkaratzas-review (rubric {m.group(1) if m else 'unknown'})"
+
+
 def read_verdicts(path, rules):
     rows = {}
     for n, line in numbered(Path(path).read_text()):
@@ -473,6 +485,7 @@ def cmd_score(args):
     print("gates: " + ", ".join(f"{g} {s}" for g, s in d["gates"].items()))
     print("diff failed: " + (", ".join(d["failed"]) or "none"))
     print("overall failed: " + (", ".join(o["failed"]) or "none"))
+    print("footer: " + footer(args.rubric))
 
 
 def main(argv=None):

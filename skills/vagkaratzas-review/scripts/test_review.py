@@ -224,6 +224,9 @@ class ScoreTest(unittest.TestCase):
         self.assertEqual(result["diff"]["score"], Decimal("3.40"))
         self.assertEqual(result["overall"]["score"], Decimal("4.00"))
 
+    def test_footer_reads_plugin_and_rubric_versions(self):
+        self.assertRegex(review.footer(), r"^nf-core-reviewer \d+\.\d+\.\d+ / vagkaratzas-review \(rubric v\d+\)$")
+
     def test_missing_rule_is_an_error(self):
         with tempfile.TemporaryDirectory() as tmp:
             verdicts = Path(tmp) / "v.tsv"

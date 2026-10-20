@@ -51,7 +51,7 @@ Placeholders: `<modules_repo>` is the user's nf-core/modules clone (ask if unkno
    ```bash
    python3 <skill_dir>/scripts/review.py score ~/nf-core-reviews/<name>.verdicts.tsv
    ```
-   Use its scores, event and approval line exactly as printed.
+   Use its scores, event, approval line and footer exactly as printed.
 6. **Write the review** to `~/nf-core-reviews/<name>.md` in the format below, show it to the user, and stop.
 7. **Clean up** the worktree with `git -C <modules_repo> worktree remove <work>/pr-<N>`.
 
@@ -83,7 +83,7 @@ overall_score: <x.yz>
 <if a gate was not run: "Not run: G2 (<reason>)">
 
 Diff <x.yz>/10 · Overall <x.yz>/10
-nf-core-reviewer / vagkaratzas-review (rubric v1) · <your model ID, or "unknown">
+<footer printed by `review.py score`> · <your model ID, or "unknown">
 ```
 
 **Inline comments.** Every failed finding on a line the PR added gets its own comment on that line or range. GitHub only accepts inline comments on lines inside the diff, so findings on untouched lines go in the body's "While you are here" list instead. Each comment:
