@@ -1,5 +1,16 @@
 # Release Notes
 
+## v0.4.0dev — [unreleased]
+
+Rubric v3: scores are not comparable with rubric v2.
+
+- E1 is `na` for modules without an `environment.yml`: their tool has no Conda package, so a custom container is the only option. These modules used to fail E1 as a blocker
+- `review.py check`: T8 no longer counts a URL in a comment, such as a TODO linking a test-datasets issue, as hardcoded test data. T11 reads test `script` paths written from the repo root, instead of asking for nonsense tags like `bcl2fastq/tests/modules/nf-core/bcl2fastq`
+- Reviews of several PRs can run at once: each PR is fetched into its own ref and its head commit checked. Parallel reviews used to overwrite each other's fetch and could review the wrong PR
+- When a PR's CI never ran, only the `confirm-pass-*` and lint jobs count as CI (a green Graphite check does not), and a non-member author is asked to request an invitation in the nf-core Slack #github-invitations channel
+- Local gates: when nf-test cannot download its plugins, they are copied from the main clone; `nf-core modules lint` is time-boxed and marked `na` if it hangs
+- Posted reviews no longer leave rule IDs such as `(M12)` in the body
+
 ## v0.3.0 — [2026/10/20]
 
 Rubric v2: scores are not comparable with rubric v1.
