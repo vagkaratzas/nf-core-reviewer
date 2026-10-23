@@ -50,6 +50,8 @@ Placeholders: `<modules_repo>` is the user's nf-core/modules clone (ask if unkno
      NXF_VER=$(grep -oP 'NXF_VER:\s*"\K[^"]+' .github/workflows/nf-test.yml) nf-test test ...
      ```
      Run nf-test with `--profile=+singularity`, and never with `--update-snapshot`: a snapshot mismatch is a failure.
+     - nf-test fails to download its plugins (e.g. HTTP 406): copy them from the main clone, `cp -r <modules_repo>/.nf-test/plugins <work>/pr-<N>/.nf-test/`, and rerun.
+     - `nf-core modules lint` can hang cloning nf-core/modules under an isolated `HOME`. Run it under `timeout 600`; if it times out, mark G1 `na` and say so in the body, rather than reporting a fail.
 3. **Run the script rules** once per component:
    ```bash
    python3 <skill_dir>/scripts/review.py check <component_dir> --diff <work>/<diff file>
