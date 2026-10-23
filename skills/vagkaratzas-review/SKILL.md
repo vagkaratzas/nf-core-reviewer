@@ -42,7 +42,8 @@ Placeholders: `<modules_repo>` is the user's nf-core/modules clone (ask if unkno
      - G1 is the `nf-core lint modules (<tool/sub>)` or `nf-core lint subworkflows (<name>)` job.
      - G2 is `confirm-pass-nf-test` (`confirm-pass-gpu` for GPU components), which sums up every `<arch> | <profile> | <shard>` job.
      - Pass and fail count as they are. A failed G1 or G2 job is linked in the review body. If its log shows an infrastructure error (runner, network, pull timeout) rather than a test failure, run that gate locally instead.
-     - A check that is still `pending` or missing (CI waits for maintainer approval on a first-time contributor's PR) is not a pass: run that gate locally, or mark it `na`.
+     - A check that is still `pending` or missing (CI waits for maintainer approval on a first-time contributor's PR) is not a pass: run that gate locally, or mark it `na`. Only `confirm-pass-*` and `nf-core lint ...` jobs count; a green Graphite or labeller check is not CI.
+     - When CI never ran, check the author's membership with `gh api orgs/nf-core/members/<author>` (204 member, 404 not). For a non-member, end the review body with: "CI only runs automatically for nf-core members. Please ask for a GitHub invitation in the nf-core Slack #github-invitations channel; once you've joined, CI will run on your next push."
      - Look the component up in `.github/skip_nf_test.json`. Listed under every profile means CI ran no test: run G2 locally. Listed under some profiles: G2 stands on the others, and the review body names the skipped ones.
    - **Locally**: G3 always; G1 and G2 in local mode or when CI cannot answer. Run from the review checkout with the tools on the user's PATH. If they are missing, look in the conda base env before giving up. Run nf-test and `nextflow lint` with the Nextflow version CI pins, because results differ between versions. Set it in the same command, since shell state may not persist between commands:
      ```bash
