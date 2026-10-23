@@ -338,7 +338,7 @@ class Checker:
                 self.fail("T8", self.test, n, "`projectDir` path; use params.modules_testdata_base_path")
             if "pipelines_testdata_base_path" in t:
                 self.fail("T8", self.test, n, "pipeline test data; use the test-datasets modules branch")
-            if re.search(r"https?://", t):
+            if re.search(r"https?://", t) and not t.lstrip().startswith(("//", "*", "/*")):
                 self.fail("T8", self.test, n, "hardcoded URL; use params.modules_testdata_base_path")
         for m in re.finditer(r"file\(\s*params\.modules_testdata_base_path[^)]*\)", self.test_text):
             if "checkIfExists" not in m.group(0):

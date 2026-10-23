@@ -201,6 +201,15 @@ class CheckTest(unittest.TestCase):
                 comp = make_module(root, GOOD_MAIN, test, ENV)
                 self.assertEqual("T4" in failing(review.Checker(comp, root).run()), expected, test)
 
+    def test_t8_ignores_urls_in_comments(self):
+        for line, expected in (("// TODO see https://github.com/x", False), ('file("https://x/y.fa")', True)):
+            test = GOOD_TEST.replace("        when {\n            params { module_args = '--fast' }",
+                                     "        when {\n            " + line + "\n            params { module_args = '--fast' }", 1)
+            with tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                comp = make_module(root, GOOD_MAIN, test, ENV)
+                self.assertEqual("T8" in failing(review.Checker(comp, root).run()), expected, line)
+
     def test_diff_scope(self):
         diff = ("diff --git a/x.nf b/x.nf\n--- a/x.nf\n+++ b/x.nf\n@@ -1,2 +1,3 @@\n a\n+b\n c\n"
                 "diff --git a/y.nf b/y.nf\nnew file mode 100644\n--- /dev/null\n+++ b/y.nf\n@@ -0,0 +1 @@\n++ added\n")
