@@ -108,7 +108,7 @@ Diff <x.yz>/10 · Overall <x.yz>/10
 ## Posting (only when the user asks)
 
 1. Confirm `gh` is available and authenticated.
-2. Rebuild the payload from the `.md` file as the user left it, because they may have edited it. Strip the trailing rule IDs (`(T1)`) from every comment, since PR authors don't know the rubric. Write it to `<work>/review-<N>.json`:
+2. Rebuild the payload from the `.md` file as the user left it, because they may have edited it. Strip the rule IDs (`(T1)`) from every comment and from the body, including its "While you are here" list, since PR authors don't know the rubric. Before posting, `grep -nE '\([A-Z][0-9]+\)' <work>/review-<N>.json` must print nothing. Write it to `<work>/review-<N>.json`:
    ```json
    {"event": "COMMENT", "body": "<review body>",
     "comments": [{"path": "<path>", "line": 12, "side": "RIGHT", "body": "<comment>"},
