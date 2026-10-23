@@ -26,10 +26,11 @@ Placeholders: `<modules_repo>` is the user's nf-core/modules clone (ask if unkno
      ```bash
      gh pr view <N> -R nf-core/modules --json title,author,body,files
      gh pr diff <N> -R nf-core/modules > <work>/pr-<N>.diff
-     git -C <modules_repo> fetch https://github.com/nf-core/modules.git pull/<N>/head
-     git -C <modules_repo> worktree add --detach <work>/pr-<N> FETCH_HEAD
+     git -C <modules_repo> fetch https://github.com/nf-core/modules.git pull/<N>/head:refs/review/pr-<N>
+     git -C <modules_repo> worktree add --detach <work>/pr-<N> refs/review/pr-<N>
+     git -C <work>/pr-<N> rev-parse HEAD   # must equal: gh pr view <N> -R nf-core/modules --json headRefOid -q .headRefOid
      ```
-     Review inside `<work>/pr-<N>`. Never `gh pr checkout` in `<modules_repo>`.
+     Review inside `<work>/pr-<N>`. Never `gh pr checkout` in `<modules_repo>`. Fetch into the PR's own ref, never `FETCH_HEAD`: other reviews running in parallel overwrite `FETCH_HEAD`. Name every file in `<work>` after the PR (`pr-<N>-nftest.log`), since `<work>` may be shared too.
    - Local mode:
      ```bash
      git -C <modules_repo> fetch https://github.com/nf-core/modules.git master
@@ -60,7 +61,7 @@ Placeholders: `<modules_repo>` is the user's nf-core/modules clone (ask if unkno
    ```
    Use its scores, event, approval line and footer exactly as printed.
 6. **Write the review** to `~/nf-core-reviews/<name>.md` in the format below, show it to the user, and stop.
-7. **Clean up** the worktree with `git -C <modules_repo> worktree remove <work>/pr-<N>`.
+7. **Clean up** the worktree and the ref: `git -C <modules_repo> worktree remove <work>/pr-<N>` and `git -C <modules_repo> update-ref -d refs/review/pr-<N>`.
 
 ## Review file
 
