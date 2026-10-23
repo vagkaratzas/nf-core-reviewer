@@ -175,6 +175,9 @@ class Checker:
 
     # E1
     def check_containers(self):
+        if not (self.dir / "environment.yml").is_file():
+            self.na("E1", "no environment.yml: custom container, the tool has no Conda package")
+            return
         self.ok("E1")
         legacy = [n for n, t in numbered(self.main_text)
                   if re.search(r"quay\.io/biocontainers|depot\.galaxyproject\.org", t)]
