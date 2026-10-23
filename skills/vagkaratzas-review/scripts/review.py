@@ -386,7 +386,8 @@ class Checker:
             for dep in self.includes():
                 need |= self.component_tags(dep)
         for s in re.findall(r"^\s*script\s+['\"]([^'\"]+)['\"]", text, re.M):
-            target = Path(os.path.normpath(self.dir / "tests" / s)).parent
+            base = self.dir / "tests" if s.startswith(".") else self.root
+            target = Path(os.path.normpath(base / s)).parent
             if target != self.dir:
                 need |= self.component_tags(target)
         missing = sorted(need - tags)

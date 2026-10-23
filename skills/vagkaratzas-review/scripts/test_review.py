@@ -210,6 +210,13 @@ class CheckTest(unittest.TestCase):
                 comp = make_module(root, GOOD_MAIN, test, ENV)
                 self.assertEqual("T8" in failing(review.Checker(comp, root).run()), expected, line)
 
+    def test_t11_reads_root_relative_script_paths(self):
+        test = GOOD_TEST.replace('script "../main.nf"', 'script "modules/nf-core/foo/bar/main.nf"', 1)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            comp = make_module(root, GOOD_MAIN, test, ENV)
+            self.assertNotIn("T11", failing(review.Checker(comp, root).run()))
+
     def test_diff_scope(self):
         diff = ("diff --git a/x.nf b/x.nf\n--- a/x.nf\n+++ b/x.nf\n@@ -1,2 +1,3 @@\n a\n+b\n c\n"
                 "diff --git a/y.nf b/y.nf\nnew file mode 100644\n--- /dev/null\n+++ b/y.nf\n@@ -0,0 +1 @@\n++ added\n")
