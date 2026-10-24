@@ -175,6 +175,9 @@ class Checker:
 
     # E1
     def check_containers(self):
+        if not (self.dir / "environment.yml").is_file():
+            self.na("E1", "no environment.yml: custom container, the tool has no Conda package")
+            return
         self.ok("E1")
         legacy = [n for n, t in numbered(self.main_text)
                   if re.search(r"quay\.io/biocontainers|depot\.galaxyproject\.org", t)]
@@ -338,7 +341,7 @@ class Checker:
                 self.fail("T8", self.test, n, "`projectDir` path; use params.modules_testdata_base_path")
             if "pipelines_testdata_base_path" in t:
                 self.fail("T8", self.test, n, "pipeline test data; use the test-datasets modules branch")
-            if re.search(r"https?://", t):
+            if re.search(r"https?://", t) and not t.lstrip().startswith(("//", "*", "/*")):
                 self.fail("T8", self.test, n, "hardcoded URL; use params.modules_testdata_base_path")
         for m in re.finditer(r"file\(\s*params\.modules_testdata_base_path[^)]*\)", self.test_text):
             if "checkIfExists" not in m.group(0):
@@ -386,7 +389,8 @@ class Checker:
             for dep in self.includes():
                 need |= self.component_tags(dep)
         for s in re.findall(r"^\s*script\s+['\"]([^'\"]+)['\"]", text, re.M):
-            target = Path(os.path.normpath(self.dir / "tests" / s)).parent
+            base = self.dir / "tests" if s.startswith(".") else self.root
+            target = Path(os.path.normpath(base / s)).parent
             if target != self.dir:
                 need |= self.component_tags(target)
         missing = sorted(need - tags)

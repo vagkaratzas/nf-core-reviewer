@@ -26,10 +26,11 @@ Placeholders: `<modules_repo>` is the user's nf-core/modules clone (ask if unkno
      ```bash
      gh pr view <N> -R nf-core/modules --json title,author,body,files
      gh pr diff <N> -R nf-core/modules > <work>/pr-<N>.diff
-     git -C <modules_repo> fetch https://github.com/nf-core/modules.git pull/<N>/head
-     git -C <modules_repo> worktree add --detach <work>/pr-<N> FETCH_HEAD
+     git -C <modules_repo> fetch https://github.com/nf-core/modules.git pull/<N>/head:refs/review/pr-<N>
+     git -C <modules_repo> worktree add --detach <work>/pr-<N> refs/review/pr-<N>
+     git -C <work>/pr-<N> rev-parse HEAD   # must equal: gh pr view <N> -R nf-core/modules --json headRefOid -q .headRefOid
      ```
-     Review inside `<work>/pr-<N>`. Never `gh pr checkout` in `<modules_repo>`.
+     Review inside `<work>/pr-<N>`. Never `gh pr checkout` in `<modules_repo>`. Fetch into the PR's own ref, never `FETCH_HEAD`: other reviews running in parallel overwrite `FETCH_HEAD`. Name every file in `<work>` after the PR (`pr-<N>-nftest.log`), since `<work>` may be shared too.
    - Local mode:
      ```bash
      git -C <modules_repo> fetch https://github.com/nf-core/modules.git master
@@ -41,13 +42,16 @@ Placeholders: `<modules_repo>` is the user's nf-core/modules clone (ask if unkno
      - G1 is the `nf-core lint modules (<tool/sub>)` or `nf-core lint subworkflows (<name>)` job.
      - G2 is `confirm-pass-nf-test` (`confirm-pass-gpu` for GPU components), which sums up every `<arch> | <profile> | <shard>` job.
      - Pass and fail count as they are. A failed G1 or G2 job is linked in the review body. If its log shows an infrastructure error (runner, network, pull timeout) rather than a test failure, run that gate locally instead.
-     - A check that is still `pending` or missing (CI waits for maintainer approval on a first-time contributor's PR) is not a pass: run that gate locally, or mark it `na`.
+     - A check that is still `pending` or missing (CI waits for maintainer approval on a first-time contributor's PR) is not a pass: run that gate locally, or mark it `na`. Only `confirm-pass-*` and `nf-core lint ...` jobs count; a green Graphite or labeller check is not CI.
+     - When CI never ran, check the author's membership with `gh api orgs/nf-core/members/<author>` (204 member, 404 not). For a non-member, end the review body with: "CI only runs automatically for nf-core members. Please ask for a GitHub invitation in the nf-core Slack #github-invitations channel; once you've joined, CI will run on your next push."
      - Look the component up in `.github/skip_nf_test.json`. Listed under every profile means CI ran no test: run G2 locally. Listed under some profiles: G2 stands on the others, and the review body names the skipped ones.
    - **Locally**: G3 always; G1 and G2 in local mode or when CI cannot answer. Run from the review checkout with the tools on the user's PATH. If they are missing, look in the conda base env before giving up. Run nf-test and `nextflow lint` with the Nextflow version CI pins, because results differ between versions. Set it in the same command, since shell state may not persist between commands:
      ```bash
      NXF_VER=$(grep -oP 'NXF_VER:\s*"\K[^"]+' .github/workflows/nf-test.yml) nf-test test ...
      ```
      Run nf-test with `--profile=+singularity`, and never with `--update-snapshot`: a snapshot mismatch is a failure.
+     - nf-test fails to download its plugins (e.g. HTTP 406): copy them from the main clone, `cp -r <modules_repo>/.nf-test/plugins <work>/pr-<N>/.nf-test/`, and rerun.
+     - `nf-core modules lint` can hang cloning nf-core/modules under an isolated `HOME`. Run it under `timeout 600`; if it times out, mark G1 `na` and say so in the body, rather than reporting a fail.
 3. **Run the script rules** once per component:
    ```bash
    python3 <skill_dir>/scripts/review.py check <component_dir> --diff <work>/<diff file>
@@ -60,7 +64,7 @@ Placeholders: `<modules_repo>` is the user's nf-core/modules clone (ask if unkno
    ```
    Use its scores, event, approval line and footer exactly as printed.
 6. **Write the review** to `~/nf-core-reviews/<name>.md` in the format below, show it to the user, and stop.
-7. **Clean up** the worktree with `git -C <modules_repo> worktree remove <work>/pr-<N>`.
+7. **Clean up** the worktree and the ref: `git -C <modules_repo> worktree remove <work>/pr-<N>` and `git -C <modules_repo> update-ref -d refs/review/pr-<N>`.
 
 ## Review file
 
@@ -104,7 +108,7 @@ Diff <x.yz>/10 · Overall <x.yz>/10
 ## Posting (only when the user asks)
 
 1. Confirm `gh` is available and authenticated.
-2. Rebuild the payload from the `.md` file as the user left it, because they may have edited it. Strip the trailing rule IDs (`(T1)`) from every comment, since PR authors don't know the rubric. Write it to `<work>/review-<N>.json`:
+2. Rebuild the payload from the `.md` file as the user left it, because they may have edited it. Strip the rule IDs (`(T1)`) from every comment and from the body, including its "While you are here" list, since PR authors don't know the rubric. Before posting, `grep -nE '\([A-Z][0-9]+\)' <work>/review-<N>.json` must print nothing. Write it to `<work>/review-<N>.json`:
    ```json
    {"event": "COMMENT", "body": "<review body>",
     "comments": [{"path": "<path>", "line": 12, "side": "RIGHT", "body": "<comment>"},

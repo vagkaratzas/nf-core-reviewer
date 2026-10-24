@@ -1,4 +1,4 @@
-# vagkaratzas-review rubric v2
+# vagkaratzas-review rubric v3
 
 Bump the version in this title whenever a rule, severity or weight changes: scores are only comparable within one rubric version.
 
@@ -37,7 +37,7 @@ For a PR, G1 and G2 are read from its CI checks (`SKILL.md` step 2 says how). CI
 
 | ID | Severity | Check | Rule |
 |----|----------|-------|------|
-| E1 | blocker | script | Containers are Seqera Wave builds from `nf-core modules containers create`: the directive points at `community-cr-prod.seqera.io` / `community.wave.seqera.io`, `meta.yml` has a `containers:` block, `.conda-lock/` holds the lock files. No `quay.io/biocontainers` or `depot.galaxyproject.org`. A version bump on a legacy module must port it. |
+| E1 | blocker | script | Containers are Seqera Wave builds from `nf-core modules containers create`: the directive points at `community-cr-prod.seqera.io` / `community.wave.seqera.io`, `meta.yml` has a `containers:` block, `.conda-lock/` holds the lock files. No `quay.io/biocontainers` or `depot.galaxyproject.org`. A version bump on a legacy module must port it. NA when the module has no `environment.yml`: the tool has no Conda package, so a custom container (often from a `Dockerfile`) is the only option. |
 
 ## main.nf
 
