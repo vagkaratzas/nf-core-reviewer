@@ -1,7 +1,7 @@
 {
   "name": "nf-core-reviewer",
   "description": "Review and score nf-core/modules pull requests the way vagkaratzas reviews them",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": {
     "name": "Evangelos Karatzas",
     "email": "vagkaratzas1990@gmail.com"
