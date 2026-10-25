@@ -57,14 +57,15 @@ Placeholders: `<modules_repo>` is the user's nf-core/modules clone (ask if unkno
    python3 <skill_dir>/scripts/review.py check <component_dir> --diff <work>/<diff file>
    ```
    Each row is `rule  PASS|FAIL|NA  path:line  diff|overall  message`. `diff` means the hit is on a line the PR added; `overall` means it was already there or on an untouched line.
-4. **Judge every rule twice.** The Diff column covers what the PR changed; the Overall column covers the whole component. Read `main.nf`, `environment.yml`, the tests, the snapshot, `meta.yml` and the PR body for the judgment rules. When there are several components, a rule fails if it fails in any of them.
-5. **Score.** Write `~/nf-core-reviews/<name>.verdicts.tsv` with one `rule<TAB>diff<TAB>overall` row per rubric rule. Use `modules-pr-<N>` as `<name>` in PR mode and the branch name in local mode. Then run:
+4. **Read the tool's manual.** For every tool and subcommand the component runs, take a quick look at its online documentation (the `documentation`/`homepage` links in `meta.yml`, or the tool's repository README). Pull the container to run `<tool> <sub> --help` only when the online docs don't list the file options. List every file option it reads and every file it writes, optional ones included, and compare against the module's inputs and outputs for M15. Name each missing one, with the flag that takes or produces it, in the review.
+5. **Judge every rule twice.** The Diff column covers what the PR changed; the Overall column covers the whole component. Read `main.nf`, `environment.yml`, the tests, the snapshot, `meta.yml` and the PR body for the judgment rules. When there are several components, a rule fails if it fails in any of them.
+6. **Score.** Write `~/nf-core-reviews/<name>.verdicts.tsv` with one `rule<TAB>diff<TAB>overall` row per rubric rule. Use `modules-pr-<N>` as `<name>` in PR mode and the branch name in local mode. Then run:
    ```bash
    python3 <skill_dir>/scripts/review.py score ~/nf-core-reviews/<name>.verdicts.tsv
    ```
    Use its scores, event, approval line and footer exactly as printed.
-6. **Write the review** to `~/nf-core-reviews/<name>.md` in the format below, show it to the user, and stop.
-7. **Clean up** the worktree and the ref: `git -C <modules_repo> worktree remove <work>/pr-<N>` and `git -C <modules_repo> update-ref -d refs/review/pr-<N>`.
+7. **Write the review** to `~/nf-core-reviews/<name>.md` in the format below, show it to the user, and stop.
+8. **Clean up** the worktree and the ref: `git -C <modules_repo> worktree remove <work>/pr-<N>` and `git -C <modules_repo> update-ref -d refs/review/pr-<N>`.
 
 ## Review file
 

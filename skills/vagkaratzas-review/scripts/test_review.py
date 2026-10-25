@@ -260,7 +260,7 @@ class ScoreTest(unittest.TestCase):
         self.assertEqual(result["overall"]["score"], Decimal("4.00"))
 
     def test_footer_reads_plugin_and_rubric_versions(self):
-        self.assertRegex(review.footer(), r"^nf-core-reviewer \d+\.\d+\.\d+ / vagkaratzas-review \(rubric v\d+\)$")
+        self.assertRegex(review.footer(), r"^nf-core-reviewer \d+\.\d+\.\d+(dev)? / vagkaratzas-review \(rubric v\d+\)$")
 
     def test_missing_rule_is_an_error(self):
         with tempfile.TemporaryDirectory() as tmp:

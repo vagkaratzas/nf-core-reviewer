@@ -1,4 +1,4 @@
-# vagkaratzas-review rubric v3
+# vagkaratzas-review rubric v4
 
 Bump the version in this title whenever a rule, severity or weight changes: scores are only comparable within one rubric version.
 
@@ -57,6 +57,7 @@ For a PR, G1 and G2 are read from its CI checks (`SKILL.md` step 2 says how). CI
 | M12 | major | judgment | The stub creates exactly what a real run creates for the same inputs: names, input-dependent branches, cardinality, optional outputs. Gzipped outputs via `echo "" \| gzip > x.gz`, never `touch x.gz`. |
 | M13 | minor | judgment | Inline scripts over ~20 lines move to `templates/`. |
 | M14 | major | judgment | A module-root `nextflow.config` exists only when the module cannot run correctly without it, and the PR says why. Present without need and needed but missing both fail. |
+| M15 | blocker | judgment | Every file the tool or subcommand can read, optional ones included (indexes, references, databases, configs), comes in through an input channel, and every file it can write, optional ones included, is emitted (`optional: true` when not always produced). Check against the tool's online documentation (or `--help` when the docs fall short) (step 4 of `SKILL.md`), not only against what the module already wires. Each missing input or output is its own finding. |
 
 ## Tests
 

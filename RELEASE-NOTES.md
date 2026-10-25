@@ -2,6 +2,10 @@
 
 ## v0.5.0dev — [unreleased]
 
+Rubric v4: scores are not comparable with rubric v3.
+
+- New blocker M15: the module exposes every file input and output its tool or subcommand offers, optional ones included. The reviewer now checks the tool's manual or `--help` and names each missing file input or output
+
 ## v0.4.0 — [2026/10/24]
 
 Rubric v3: scores are not comparable with rubric v2.
