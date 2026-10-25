@@ -25,6 +25,8 @@ VERSION_OPTIONAL = {"pip", "gzip", "pigz", "coreutils", "procps-ng", "gawk", "se
 LABELS = {"process_single", "process_low", "process_medium", "process_high", "process_long", "process_high_memory", "process_low_memory"}
 STATUSES = {"pass", "fail", "na"}
 STUB = re.compile(r"options\s+['\"]-stub")
+# main.nf.test, plus variants such as main.gpu.nf.test, and their snapshots
+TEST_FILE = re.compile(r"main(\.\w+)?\.nf\.test(\.snap)?|tags\.yml")
 
 
 def read(path):
@@ -114,10 +116,13 @@ class Checker:
         self.test = comp_dir / "tests" / "main.nf.test"
         self.meta = comp_dir / "meta.yml"
         self.main_text, self.test_text, self.meta_text = read(self.main), read(self.test), read(self.meta)
+        extra = sorted(p for p in (comp_dir / "tests").glob("main.*.nf.test") if p != self.test)
+        self.tests = [self.test] + extra
 
     def ok(self, *rules):
         for rule in rules:
-            self.results.setdefault(rule, [])
+            if not isinstance(self.results.get(rule), list):
+                self.results[rule] = []
 
     def na(self, rule, reason):
         self.results[rule] = reason
@@ -163,10 +168,15 @@ class Checker:
             for rule in ("E1", "M1", "M2", "M7", "M11", "Y1", "Y3", "Y4"):
                 self.na(rule, "subworkflow")
             self.check_components()
-        self.check_strict_syntax()
         if self.test_text:
-            self.check_tests()
+            for self.test in self.tests:
+                self.test_text = read(self.test)
+                self.check_strict_syntax()
+                self.check_tests()
+            self.check_module_args()
+            self.check_fixtures()
         else:
+            self.check_strict_syntax()
             for rule in ("T1", "T3"):
                 self.fail(rule, self.test, 0, "no tests/main.nf.test")
             for rule in ("T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11"):
@@ -231,11 +241,13 @@ class Checker:
     # Y1, Y3, Y4
     def check_meta(self):
         self.ok("Y1", "Y3", "Y4")
-        text = self.meta_text
+        text, kind = self.meta_text, None
         for n, t in numbered(text):
+            if m := re.match(r"\s*type:\s*(\w+)", t):
+                kind = m.group(1)
             if "edam:" in t and "#" not in t.split("edam:", 1)[1]:
                 self.fail("Y1", self.meta, n, "EDAM term without its format name comment, e.g. `# FASTQ`")
-            if re.search(r"ontologies:\s*\[\s*\]", t):
+            if re.search(r"ontologies:\s*\[\s*\]", t) and kind != "directory":
                 self.fail("Y1", self.meta, n, "empty ontologies; confirm no EDAM term exists")
             if re.match(r"\s*doi:\s*(\"\"|''|null|~)?\s*$", t):
                 self.fail("Y3", self.meta, n, "empty doi; omit the key")
@@ -263,7 +275,10 @@ class Checker:
     # C2
     def check_strict_syntax(self):
         self.ok("C2")
-        for path, text in ((self.main, self.main_text), (self.test, self.test_text)):
+        files = [(self.test, self.test_text)]
+        if self.test == self.tests[0]:
+            files.insert(0, (self.main, self.main_text))
+        for path, text in files:
             for n, t in numbered(text):
                 if t.lstrip().startswith("//"):
                     continue
@@ -303,39 +318,42 @@ class Checker:
         for n, t in numbered(text):
             if re.search(r"(process|workflow)\.out\.versions", t):
                 self.fail("T1", self.test, n, "separate versions assertion; sanitizeOutput already snapshots versions")
-        self.check_module_args()
         self.check_test_data()
         self.check_snapshot()
         self.check_tags()
 
     # T7
     def check_module_args(self):
-        cfg = self.dir / "tests" / "nextflow.config"
-        ctext = read(cfg)
         if self.kind == "subworkflow":
             self.na("T7", "subworkflow tests configure several processes")
             return
-        if not ctext:
-            if "module_args" in self.test_text:
-                self.fail("T7", self.test, 0, "tests set module_args but there is no tests/nextflow.config")
+        configs = sorted((self.dir / "tests").glob("nextflow*.config"))
+        if not configs:
+            if any("module_args" in read(t) for t in self.tests):
+                self.fail("T7", self.tests[0], 0, "tests set module_args but there is no tests/nextflow.config")
             else:
-                self.na("T7", "no tests/nextflow.config")
+                self.na("T7", "no tests/nextflow*.config")
             return
         self.ok("T7")
-        hits = list(re.finditer(r"ext\.args\d*\s*=", ctext))
-        for i, m in enumerate(hits):
-            end = hits[i + 1].start() if i + 1 < len(hits) else len(ctext)
-            if "module_args" not in ctext[m.start():end].split("withName")[0]:
-                self.fail("T7", cfg, line_of(ctext, m.start()), "ext.args should come from params.module_args, set per test")
-        if "module_args" in ctext and not re.search(r"module_args\d*\s*\?:", ctext):
-            self.fail("T7", cfg, 0, "default it: `params.module_args ?: ''`")
+        for cfg in configs:
+            ctext = read(cfg)
+            hits = list(re.finditer(r"ext\.args\d*\s*=", ctext))
+            for i, m in enumerate(hits):
+                end = hits[i + 1].start() if i + 1 < len(hits) else len(ctext)
+                if "module_args" not in ctext[m.start():end].split("withName")[0]:
+                    self.fail("T7", cfg, line_of(ctext, m.start()), "ext.args should come from params.module_args, set per test")
+            if "module_args" in ctext and not re.search(r"module_args\d*\s*\?:", ctext):
+                self.fail("T7", cfg, 0, "default it: `params.module_args ?: ''`")
 
     # T8
-    def check_test_data(self):
+    def check_fixtures(self):
         self.ok("T8")
         for f in sorted((self.dir / "tests").rglob("*")):
-            if f.is_file() and f.name not in ("main.nf.test", "main.nf.test.snap", "tags.yml") and f.suffix != ".config":
+            if f.is_file() and not TEST_FILE.fullmatch(f.name) and f.suffix != ".config":
                 self.fail("T8", f, 0, "local fixture file; host it on the test-datasets modules branch or generate it in the test")
+
+    def check_test_data(self):
+        self.ok("T8")
         for n, t in numbered(self.test_text):
             if re.search(r"\bprojectDir\b", t):
                 self.fail("T8", self.test, n, "`projectDir` path; use params.modules_testdata_base_path")
@@ -349,11 +367,12 @@ class Checker:
 
     # T9, T10
     def check_snapshot(self):
-        snap = self.dir / "tests" / "main.nf.test.snap"
+        snap = self.test.with_name(self.test.name + ".snap")
         stext = read(snap)
         if not stext:
-            self.na("T9", "no snapshot file")
-            self.na("T10", "no snapshot file")
+            if self.test == self.tests[0]:
+                self.na("T9", "no snapshot file")
+                self.na("T10", "no snapshot file")
             return
         self.ok("T9", "T10")
         try:

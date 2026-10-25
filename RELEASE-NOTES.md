@@ -5,6 +5,9 @@
 Rubric v4: scores are not comparable with rubric v3.
 
 - New blocker M15: the module exposes every file input and output its tool or subcommand offers, optional ones included. The reviewer now checks the tool's manual or `--help` and names each missing file input or output
+- New major E2: GPU-capable modules follow the nf-core GPU modules guide (dual containers chosen by `task.accelerator`, exact lowest `cuda-version` pin, CUDA build glob, CUDA version on the versions topic, a `gpu`-tagged `main.gpu.nf.test` with real and stub tests, and `nextflow.gpu.config` setting `accelerator = 1` and `maxForks = 1`). For GPU components, G2 needs both `confirm-pass-nf-test` and `confirm-pass-gpu`
+- `review.py check` runs the test rules on every test file, so `main.gpu.nf.test` is checked too, and T3 asks for a stub test in each file. T7 reads every `tests/nextflow*.config`, including `nextflow.gpu.config` and older per-test configs that hardcode `ext.args`
+- `review.py check` false positives: T8 no longer counts `main.gpu.nf.test` and its snapshot as local fixture files, and Y1 accepts `ontologies: []` on `type: directory` entries, which have no EDAM format
 
 ## v0.4.0 — [2026/10/24]
 

@@ -201,6 +201,21 @@ class CheckTest(unittest.TestCase):
                 comp = make_module(root, GOOD_MAIN, test, ENV)
                 self.assertEqual("T4" in failing(review.Checker(comp, root).run()), expected, test)
 
+    def test_gpu_test_files(self):
+        config = "process {\n    withName: 'FOO_BAR' {\n        ext.args = { params.module_args ?: '' }\n    }\n}\n"
+        gpu_config = "process {\n    withName: 'FOO_BAR' {\n        accelerator = 1\n        ext.args = '--fast'\n    }\n}\n"
+        gpu_test = GOOD_TEST.replace("assert snapshot(", "assert path(x).readLines().any { it.startsWith('A') }\n                { assert snapshot(", 1)
+        meta = GOOD_META + "  - - db:\n        type: directory\n        ontologies: []\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            comp = make_module(root, GOOD_MAIN, GOOD_TEST, ENV, meta, config, lock=True)
+            (comp / "tests" / "main.gpu.nf.test").write_text(gpu_test)
+            (comp / "tests" / "main.gpu.nf.test.snap").write_text("{}")
+            (comp / "tests" / "nextflow.gpu.config").write_text(gpu_config)
+            results = review.Checker(comp, root).run()
+        self.assertEqual(failing(results), {"C2", "T7"}, results)
+        self.assertTrue(all("gpu" in str(path) for path, _, _ in results["C2"] + results["T7"]))
+
     def test_t8_ignores_urls_in_comments(self):
         for line, expected in (("// TODO see https://github.com/x", False), ('file("https://x/y.fa")', True)):
             test = GOOD_TEST.replace("        when {\n            params { module_args = '--fast' }",

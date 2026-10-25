@@ -23,6 +23,8 @@ Gates get the same verdict in both columns. A gate that could not be run is `na`
 
 **Check** says who decides: `script` = `scripts/review.py check` (its verdict stands; overturn a hit only as a false positive, with the reason written in the review), `judgment` = read the code, `command` = run it.
 
+Test rules (T1–T11) apply to every test file: `main.nf.test` and variants such as `main.gpu.nf.test`.
+
 ## Gates
 
 | ID | Severity | Check | Rule |
@@ -38,6 +40,7 @@ For a PR, G1 and G2 are read from its CI checks (`SKILL.md` step 2 says how). CI
 | ID | Severity | Check | Rule |
 |----|----------|-------|------|
 | E1 | blocker | script | Containers are Seqera Wave builds from `nf-core modules containers create`: the directive points at `community-cr-prod.seqera.io` / `community.wave.seqera.io`, `meta.yml` has a `containers:` block, `.conda-lock/` holds the lock files. No `quay.io/biocontainers` or `depot.galaxyproject.org`. A version bump on a legacy module must port it. NA when the module has no `environment.yml`: the tool has no Conda package, so a custom container (often from a `Dockerfile`) is the only option. |
+| E2 | major | judgment | GPU-capable modules follow the nf-core GPU modules guide. The module reads `task.accelerator` and never sets `accelerator` itself. A GPU build much larger than the CPU one gets the dual-container pattern: `environment.gpu.yml` and GPU Wave URLs for Docker and Singularity, chosen by `task.accelerator`. `cuda-version` is pinned exactly, at the lowest version the GPU package supports. GPU Python backends carry a CUDA build glob (`jaxlib=0.4.25=*cuda*`). The CUDA version is emitted on the versions topic, with a descriptive string (`no CUDA available`) on CPU. `tests/main.gpu.nf.test` is tagged `gpu` (or `gpu_highmem`), holds a real and a stub test, and uses `tests/nextflow.gpu.config` with `accelerator = 1` and `maxForks = 1`. NA for CPU-only modules. |
 
 ## main.nf
 
@@ -65,11 +68,11 @@ For a PR, G1 and G2 are read from its CI checks (`SKILL.md` step 2 says how). CI
 |----|----------|-------|------|
 | T1 | blocker | script | Every test, stub included, asserts `snapshot(sanitizeOutput(process.out ...))` (`workflow.out` for subworkflows): `sanitizeOutput` inside `snapshot(...)`, never raw `.out`, no separate versions assertion. |
 | T2 | major | judgment | `unstableKeys` lists only channels whose content truly changes between runs, and each exempted channel gets the strongest stable check back in the same `snapshot(...)`: line count, else `.contains()` on a line the tool always writes. Hand-picking channels instead of `unstableKeys` fails. |
-| T3 | blocker | script | At least one `options "-stub"` test. |
+| T3 | blocker | script | At least one `options "-stub"` test in every test file. |
 | T4 | nit | script | As in the nf-core template: a bare `assert process.success` (`workflow.success` for subworkflows) comes first, then `assertAll(...)` holds the snapshot. |
 | T5 | major | script | Test names follow `<organism> - <inputs> - <outputs/config>`, e.g. `sarscov2 - [ cram, crai ] - fasta - fai`. Stub tests end with ` - stub`. |
 | T6 | nit | script | Sentence-style names (`Should search ... and return ...`) are nf-core-valid but not preferred; grouped inputs are written `[ bam, bai ]`, with spaces. |
-| T7 | major | script | Modules: `tests/nextflow.config` takes arguments as `ext.args = { params.module_args ?: '' }` (fixed flags may precede it), and tests that need arguments set `params { module_args = '...' }` in their `when` block. |
+| T7 | major | script | Modules: every `tests/nextflow*.config` (`nextflow.gpu.config` included) takes arguments as `ext.args = { params.module_args ?: '' }` (fixed flags may precede it), and tests that need arguments set `params { module_args = '...' }` in their `when` block. |
 | T8 | blocker | script | Test data only from the `modules` branch of nf-core/test-datasets, through `params.modules_testdata_base_path` with `checkIfExists: true`, or tiny files generated in Groovy inside the test. No local fixture files, `projectDir` paths, hardcoded URLs or pipeline-branch data. |
 | T9 | major | script | No empty-file md5 (`d41d8cd98f00b204e9800998ecf8427e`) in non-stub snapshots. |
 | T10 | major | script | Every non-stub snapshot differs from every other one, so each test can fail when its feature is removed. Every input branch (compressed and plain, each format, optional inputs given and empty) is covered: judge that part. |
@@ -81,7 +84,7 @@ For a PR, G1 and G2 are read from its CI checks (`SKILL.md` step 2 says how). CI
 
 | ID | Severity | Check | Rule |
 |----|----------|-------|------|
-| Y1 | minor | script | Every file entry has EDAM `ontologies`, one per format its `pattern` accepts, each URL followed by its format name comment (`# FASTQ`). `ontologies: []` only when no term exists. |
+| Y1 | minor | script | Every file entry has EDAM `ontologies`, one per format its `pattern` accepts, each URL followed by its format name comment (`# FASTQ`). `ontologies: []` only when no term exists, as for every `type: directory` entry. |
 | Y2 | minor | judgment | `keywords` cover research domain, data type and function, not only the tool name. Multi-tool modules add `multi-tool`. |
 | Y3 | minor | script | `doi` is omitted when there is none (never `""` or `null`). Every tool has `identifier` (`""` when not on bio.tools). |
 | Y4 | minor | script | Every tool has an `args_id` matching its `$args` variable. |
