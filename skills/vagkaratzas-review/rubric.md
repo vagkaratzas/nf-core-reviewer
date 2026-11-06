@@ -1,4 +1,4 @@
-# vagkaratzas-review rubric v6
+# vagkaratzas-review rubric v7
 
 Bump the version in this title whenever a rule, severity or weight changes: scores are only comparable within one rubric version.
 
@@ -68,7 +68,7 @@ For a PR, G1 and G2 are read from its CI checks (`SKILL.md` step 2 says how). CI
 | ID | Severity | Check | Rule |
 |----|----------|-------|------|
 | T1 | blocker | script | Every test, stub included, asserts `snapshot(sanitizeOutput(process.out ...))` (`workflow.out` for subworkflows): `sanitizeOutput` inside `snapshot(...)`, never raw `.out`, no separate versions assertion. |
-| T2 | major | judgment | `unstableKeys` lists only channels whose content truly changes between runs, and each exempted channel gets the strongest stable check back in the same `snapshot(...)`: line count, else `.contains()` on a line the tool always writes. Hand-picking channels instead of `unstableKeys` fails. |
+| T2 | major | judgment | `unstableKeys` lists only channels whose content truly changes between runs, and each exempted channel gets the strongest stable check back in the same `snapshot(...)`: line count, else `.contains()` on a line the tool always writes, or the result fields picked from such a line. A snapshotted line or value keeps no timings, paths or values derived from CPUs or memory (threads, batches, task splits), which differ on CI. Every part of a pattern matches something in that test's snapshot, and no separate `assert` repeats a value the snapshot already holds. Hand-picking channels instead of `unstableKeys` fails. |
 | T3 | blocker | script | At least one `options "-stub"` test in every test file. |
 | T4 | nit | script | As in the nf-core template: a bare `assert process.success` (`workflow.success` for subworkflows) comes first, then `assertAll(...)` holds the snapshot. |
 | T5 | major | script | Test names follow `<organism> - <inputs> - <outputs/config>`, e.g. `sarscov2 - [ cram, crai ] - fasta - fai`. Stub tests end with ` - stub`. |
