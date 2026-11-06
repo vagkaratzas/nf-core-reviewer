@@ -181,6 +181,15 @@ class CheckTest(unittest.TestCase):
             results = review.Checker(comp, root).run()
         self.assertEqual(failing(results), set(), {r: v for r, v in results.items() if isinstance(v, list) and v})
 
+    def test_t7_flags_unused_module_args_config(self):
+        config = "process {\n    withName: 'FOO_BAR' {\n        ext.args = { params.module_args ?: '' }\n    }\n}\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            comp = make_module(root, GOOD_MAIN, GOOD_TEST.replace("'--fast'", "''"), ENV, GOOD_META, config, lock=True)
+            results = review.Checker(comp, root).run()
+        self.assertEqual(failing(results), {"T7"}, results)
+        self.assertEqual(results["T7"][0][1], 3)
+
     def test_empty_and_duplicate_snapshots(self):
         test = 'test("sarscov2 - fastq - txt") {}\ntest("sarscov2 - fasta - txt") {}\n'
         content = {"content": [{"txt": ["test.txt:md5,d41d8cd98f00b204e9800998ecf8427e"]}]}

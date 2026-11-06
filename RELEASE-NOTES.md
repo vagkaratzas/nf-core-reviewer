@@ -2,6 +2,10 @@
 
 ## v0.7.0dev — [unreleased]
 
+Rubric v6: scores are not comparable with rubric v5.
+
+- T7 fails a `tests/nextflow.config` that only wires `ext.args` to `params.module_args` when no test sets a non-empty `module_args`. The config, its `config` line and the empty `params { module_args = '' }` blocks do nothing and should be dropped
+
 ## v0.6.0 — [2026/11/06]
 
 Rubric v5: scores are not comparable with rubric v4.

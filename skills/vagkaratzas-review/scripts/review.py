@@ -343,8 +343,16 @@ class Checker:
                 self.na("T7", "no tests/nextflow*.config")
             return
         self.ok("T7")
+        args_used = any(re.search(r"module_args\d*\s*=\s*('[^']+'|\"[^\"]+\")", read(t)) for t in self.tests)
         for cfg in configs:
             ctext = read(cfg)
+            wiring = re.search(r"ext\.args\d*\s*=\s*\{\s*params\.module_args\d*\s*\?:\s*''\s*\}", ctext)
+            rest = [t.strip() for t in ctext.splitlines()
+                    if t.strip() and not t.strip().startswith("//")
+                    and not re.fullmatch(r"(process\s*\{|withName:.*\{|\}|ext\.args\d*\s*=\s*\{\s*params\.module_args\d*\s*\?:\s*''\s*\})", t.strip())]
+            if wiring and not args_used and not rest:
+                self.fail("T7", cfg, line_of(ctext, wiring.start()),
+                          "no test sets module_args: drop tests/nextflow.config, its `config` line and the empty `module_args` blocks")
             hits = list(re.finditer(r"ext\.args\d*\s*=", ctext))
             for i, m in enumerate(hits):
                 end = hits[i + 1].start() if i + 1 < len(hits) else len(ctext)

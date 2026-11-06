@@ -1,4 +1,4 @@
-# vagkaratzas-review rubric v5
+# vagkaratzas-review rubric v6
 
 Bump the version in this title whenever a rule, severity or weight changes: scores are only comparable within one rubric version.
 
@@ -73,7 +73,7 @@ For a PR, G1 and G2 are read from its CI checks (`SKILL.md` step 2 says how). CI
 | T4 | nit | script | As in the nf-core template: a bare `assert process.success` (`workflow.success` for subworkflows) comes first, then `assertAll(...)` holds the snapshot. |
 | T5 | major | script | Test names follow `<organism> - <inputs> - <outputs/config>`, e.g. `sarscov2 - [ cram, crai ] - fasta - fai`. Stub tests end with ` - stub`. |
 | T6 | nit | script | Sentence-style names (`Should search ... and return ...`) are nf-core-valid but not preferred; grouped inputs are written `[ bam, bai ]`, with spaces. |
-| T7 | major | script | Modules: every `tests/nextflow*.config` (`nextflow.gpu.config` included) takes arguments as `ext.args = { params.module_args ?: '' }` (fixed flags may precede it), and tests that need arguments set `params { module_args = '...' }` in their `when` block. |
+| T7 | major | script | Modules: every `tests/nextflow*.config` (`nextflow.gpu.config` included) takes arguments as `ext.args = { params.module_args ?: '' }` (fixed flags may precede it), and tests that need arguments set `params { module_args = '...' }` in their `when` block. When no test sets a non-empty `module_args`, the config and the empty `module_args` blocks are dead code: drop `tests/nextflow.config`, its `config` line and the blocks. |
 | T8 | blocker | script | Test data only from the `modules` branch of nf-core/test-datasets, through `params.modules_testdata_base_path` with `checkIfExists: true`, or tiny files generated in Groovy inside the test. No local fixture files, `projectDir` paths, hardcoded URLs or pipeline-branch data. |
 | T9 | major | script | No empty-file md5 (`d41d8cd98f00b204e9800998ecf8427e`) in non-stub snapshots. |
 | T10 | major | script | Every non-stub snapshot differs from every other one, so each test can fail when its feature is removed. Every input branch (compressed and plain, each format, optional inputs given and empty) is covered: judge that part. |
