@@ -1,6 +1,6 @@
 # Release Notes
 
-## v0.6.0dev — [unreleased]
+## v0.6.0 — [2026/11/06]
 
 Rubric v5: scores are not comparable with rubric v4.
 
