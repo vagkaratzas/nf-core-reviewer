@@ -62,6 +62,7 @@ For a PR, G1 and G2 are read from its CI checks (`SKILL.md` step 2 says how). CI
 | M13 | minor | judgment | Inline scripts over ~20 lines move to `templates/`. |
 | M14 | major | judgment | A module-root `nextflow.config` exists only when the module cannot run correctly without it, and the PR says why. Present without need and needed but missing both fail. |
 | M15 | blocker | judgment | Every file the tool or subcommand can read, optional ones included (indexes, references, databases, configs), comes in through an input channel, and every file it can write, optional ones included, is emitted (`optional: true` when not always produced). Check against the tool's online documentation (or `--help` when the docs fall short) (step 4 of `SKILL.md`), not only against what the module already wires. Each missing input or output is its own finding. |
+| M16 | minor | judgment | When the tool has a temp/scratch option that defaults to the system temp (`$TMPDIR`, `/tmp`), the script points it at the task work directory (`--tmp_dir .`, `-T .`) before `${args}`, so `ext.args` can override it. This is not a hardcoded argument under M6. `na` when the tool has no such option. |
 
 ## Tests
 
