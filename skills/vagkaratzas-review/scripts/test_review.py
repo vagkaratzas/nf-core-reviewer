@@ -232,6 +232,14 @@ class CheckTest(unittest.TestCase):
             comp = make_module(root, GOOD_MAIN, test, ENV)
             self.assertNotIn("T11", failing(review.Checker(comp, root).run()))
 
+    def test_e3_container_layout(self):
+        broken = GOOD_MAIN.replace("        ? 'https", "?         'https").replace("        : 'community", ":         'community")
+        for main, expected in ((GOOD_MAIN, False), (broken, True)):
+            with tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                comp = make_module(root, main, GOOD_TEST, ENV)
+                self.assertEqual("E3" in failing(review.Checker(comp, root).run()), expected, main)
+
     def test_e1_na_without_environment_yml(self):
         main = BAD_MAIN.replace("quay.io/biocontainers/foo:1.0", "quay.io/nf-core/foo:1.0")
         with tempfile.TemporaryDirectory() as tmp:
