@@ -105,3 +105,4 @@ For a PR, G1 and G2 are read from its CI checks (`SKILL.md` step 2 says how). CI
 |----|----------|-------|------|
 | C1 | minor | judgment | Comments only explain why, in as few words as possible. A comment that restates the code fails. |
 | C2 | minor | script | Lowercase `channel` (`Channel` is the class) and named closure parameters, never the implicit `it`. |
+| C3 | minor | judgment | The PR body describes the final diff: changes made during review are listed, notes that no longer hold are gone, and the Docker and Conda boxes are ticked once CI has passed on them. |
