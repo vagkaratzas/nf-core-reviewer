@@ -91,6 +91,7 @@ For a PR, G1 and G2 are read from its CI checks (`SKILL.md` step 2 says how). CI
 | Y3 | minor | script | `doi` is omitted when there is none (never `""` or `null`). Every tool has `identifier` (`""` when not on bio.tools). |
 | Y4 | minor | script | Every tool has an `args_id` matching its `$args` variable. |
 | Y5 | minor | judgment | Descriptions are one short line. Optional inputs and outputs say "Optional". |
+| Y6 | minor | judgment | An input `pattern` covers every compression the tool reads: when it accepts gzipped input, both forms (`*.{fa,fa.gz}`) and the GZIP ontology. |
 
 ## Subworkflows
 
