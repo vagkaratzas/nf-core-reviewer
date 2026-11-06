@@ -2,8 +2,12 @@
 
 ## v0.7.0dev — [unreleased]
 
-Rubric v6: scores are not comparable with rubric v5.
+Rubric v7: scores are not comparable with rubric v5 or v6 (v6 was used on dev only).
 
+- T2 accepts the result fields picked from a log line as a check back, and fails a snapshotted line or value that keeps timings, paths or values derived from CPUs or memory (threads, batches, task splits), since those differ on CI. It also fails a pattern part that matches nothing in the snapshot, and a separate `assert` that repeats a value the snapshot already holds
+- New minor M16: when the tool has a temp/scratch option that defaults to the system temp, the script points it at the task work directory before `${args}`, so `ext.args` can override it. Node temp can be small on HPC
+- New minor Y6: an input `pattern` covers every compression the tool reads, with both forms and the GZIP ontology when it accepts gzipped input
+- New minor C3: the PR body describes the final diff — changes made in review listed, stale notes dropped, Docker and Conda boxes ticked once CI passed on them
 - T7 fails a `tests/nextflow.config` that only wires `ext.args` to `params.module_args` when no test sets a non-empty `module_args`. The config, its `config` line and the empty `params { module_args = '' }` blocks do nothing and should be dropped
 
 ## v0.6.0 — [2026/11/06]
