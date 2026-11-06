@@ -159,13 +159,14 @@ class Checker:
     def run(self):
         if self.kind == "module":
             self.check_containers()
+            self.check_container_layout()
             self.check_versions()
             self.check_redirect()
             self.check_label()
             self.check_meta()
             self.na("S1", "module")
         else:
-            for rule in ("E1", "M1", "M2", "M7", "M11", "Y1", "Y3", "Y4"):
+            for rule in ("E1", "E3", "M1", "M2", "M7", "M11", "Y1", "Y3", "Y4"):
                 self.na(rule, "subworkflow")
             self.check_components()
         if self.test_text:
@@ -202,6 +203,13 @@ class Checker:
             self.fail("E1", lock, 0, "no .conda-lock/ lock files")
         if not re.search(r"^containers:", self.meta_text, re.M):
             self.fail("E1", self.meta, 0, "meta.yml has no containers: block")
+
+    # E3
+    def check_container_layout(self):
+        self.ok("E3")
+        for n, t in numbered(self.main_text):
+            if re.match(r"[?:]", t):
+                self.fail("E3", self.main, n, "container ternary at column 0; rebuild with nf-core tools >= 4.2.0 or indent it")
 
     # M1, M2
     def check_versions(self):

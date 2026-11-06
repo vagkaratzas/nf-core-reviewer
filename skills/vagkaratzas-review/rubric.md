@@ -1,4 +1,4 @@
-# vagkaratzas-review rubric v4
+# vagkaratzas-review rubric v5
 
 Bump the version in this title whenever a rule, severity or weight changes: scores are only comparable within one rubric version.
 
@@ -41,6 +41,7 @@ For a PR, G1 and G2 are read from its CI checks (`SKILL.md` step 2 says how). CI
 |----|----------|-------|------|
 | E1 | blocker | script | Containers are Seqera Wave builds from `nf-core modules containers create`: the directive points at `community-cr-prod.seqera.io` / `community.wave.seqera.io`, `meta.yml` has a `containers:` block, `.conda-lock/` holds the lock files. No `quay.io/biocontainers` or `depot.galaxyproject.org`. A version bump on a legacy module must port it. NA when the module has no `environment.yml`: the tool has no Conda package, so a custom container (often from a `Dockerfile`) is the only option. |
 | E2 | major | judgment | GPU-capable modules follow the nf-core GPU modules guide. The module reads `task.accelerator` and never sets `accelerator` itself. A GPU build much larger than the CPU one gets the dual-container pattern: `environment.gpu.yml` and GPU Wave URLs for Docker and Singularity, chosen by `task.accelerator`. `cuda-version` is pinned exactly, at the lowest version the GPU package supports. GPU Python backends carry a CUDA build glob (`jaxlib=0.4.25=*cuda*`). The CUDA version is emitted on the versions topic, with a descriptive string (`no CUDA available`) on CPU. `tests/main.gpu.nf.test` is tagged `gpu` (or `gpu_highmem`), holds a real and a stub test, and uses `tests/nextflow.gpu.config` with `accelerator = 1` and `maxForks = 1`. NA for CPU-only modules. |
+| E3 | minor | script | The container directive keeps the nf-core layout: the `?` and `:` branches are indented under the `container` line, never at column 0. nf-core tools older than 4.2.0 wrote them at column 0; rebuild or reformat. |
 
 ## main.nf
 

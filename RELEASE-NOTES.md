@@ -2,6 +2,10 @@
 
 ## v0.6.0dev — [unreleased]
 
+Rubric v5: scores are not comparable with rubric v4.
+
+- New minor E3: the container directive keeps the nf-core layout, with the `?` and `:` branches indented. nf-core tools older than 4.2.0 wrote them at column 0, and 268 modules on nf-core/modules master still have that layout
+
 ## v0.5.0 — [2026/10/25]
 
 Rubric v4: scores are not comparable with rubric v3.
