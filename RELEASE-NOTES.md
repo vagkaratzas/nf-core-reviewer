@@ -1,5 +1,7 @@
 # Release Notes
 
+## v0.8.0dev — [unreleased]
+
 ## v0.7.0 — [2026/11/06]
 
 Rubric v7: scores are not comparable with rubric v5 or v6 (v6 was used on dev only).
