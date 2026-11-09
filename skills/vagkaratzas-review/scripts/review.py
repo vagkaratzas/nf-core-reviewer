@@ -16,7 +16,8 @@ from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
 RUBRIC = Path(__file__).resolve().parent.parent / "rubric.md"
-PLUGIN_ROOT = Path(__file__).resolve().parents[3]
+_parents = Path(__file__).resolve().parents
+PLUGIN_ROOT = _parents[3] if len(_parents) > 3 else Path(__file__).resolve().parent
 WEIGHTS = {"blocker": 3, "major": 2, "minor": 1, "nit": 0}
 GATE_FACTOR = Decimal("0.4")
 EMPTY_MD5 = "d41d8cd98f00b204e9800998ecf8427e"

@@ -302,5 +302,10 @@ class ScoreTest(unittest.TestCase):
                 review.read_verdicts(verdicts, {"G1": "gate", "B0": "blocker"})
 
 
+
+    def test_standalone_root_fallback(self):
+        shallow_root = Path(__file__).resolve().parent
+        self.assertIsInstance(review.footer(root=shallow_root), str)
+
 if __name__ == "__main__":
     unittest.main()
